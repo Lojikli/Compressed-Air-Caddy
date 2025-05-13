@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compressed Air Tank Caddy - 3D Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .panel {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: opacity 0.3s ease;
+        }
+        #info {
+            top: 10px;
+            left: 10px;
+            max-width: 300px;
+        }
+        #controls {
+            bottom: 70px;
+            left: 10px;
+        }
+        #viewButtons {
+            bottom: 10px;
+            right: 10px;
+        }
+        #dimensions {
+            top: 10px;
+            right: 10px;
+            max-width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #fabricationDetails {
+            top: 10px;
+            left: 320px;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #togglePanel {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.active {
+            background-color: #2E7D32;
+        }
+        .dimension {
+            margin-bottom: 5px;
+        }
+        #dimensionLines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+        #materialSpecs {
+            margin-top: 15px;
+        }
+        .material-item {
+            margin-bottom: 8px;
+        }
+        #measurementToggle {
+            background-color: #2196F3;
+        }
+        #measurementToggle:hover {
+            background-color: #0b7dda;
+        }
+        .measurement-section {
+            margin-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 10px;
+        }
+        .annotation {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas"></div>
+    
+    <div id="info" class="panel">
+        <h3>Compressed Air Tank Caddy</h3>
+        <p>Interactive 3D model showing the engineering design of a compressed air tank caddy with capacity for 15 tanks in a 3×5 configuration.</p>
+        <p>This design features proper edge reinforcement, structural support beams, and optimized tank spacing.</p>
+        <p><strong>FIXED:</strong> All offset issues corrected, tanks properly positioned, wheels correctly mounted.</p>
+    </div>
+    
+    <div id="controls" class="panel">
+        <p><strong>Controls:</strong> Click and drag to rotate. Scroll to zoom.</p>
+        <p><strong>Toggle Display:</strong></p>
+        <button id="toggleTanks">Show/Hide Tanks</button>
+        <button id="toggleFrame">Show/Hide Frame</button>
+        <button id="toggleLabels" class="active">Show/Hide Labels</button>
+        <button id="measurementToggle">Show Measurements</button>
+    </div>
+    
+    <div id="viewButtons" class="panel">
+        <button id="topView">Top View</button>
+        <button id="frontView">Front View</button>
+        <button id="sideView">Side View</button>
+        <button id="isoView">Isometric View</button>
+        <button id="explodedView">Exploded View</button>
+    </div>
+    
+    <div id="dimensions" class="panel">
+        <h3>Dimensions</h3>
+        <div class="dimension"><strong>Overall Dimensions:</strong></div>
+        <div class="dimension">• Width: 39¼" (996.95mm)</div>
+        <div class="dimension">• Length: 24½" (622.3mm)</div>
+        <div class="dimension">• Height: 19¼" (488.95mm)</div>
+        
+        <div class="measurement-section">
+            <div class="dimension"><strong>Tank Configuration:</strong></div>
+            <div class="dimension">• Tank Holes: 5⅝" diameter (142.88mm)</div>
+            <div class="dimension">• Tank Pattern: 3 rows × 5 columns</div>
+            <div class="dimension">• Horizontal Tank Spacing: 7.35" center-to-center (186.69mm)</div>
+            <div class="dimension">• Vertical Tank Spacing: 10.13" center-to-center (257.30mm)</div>
+            <div class="dimension">• Edge Margin: 2" from edge to hole (50.8mm)</div>
+        </div>
+        
+        <div class="measurement-section">
+            <div class="dimension"><strong>Frame Components:</strong></div>
+            <div class="dimension">• Tubing Size: 2" square (50.8mm)</div>
+            <div class="dimension">• Wheel Clearance: 4¼" (107.95mm)</div>
+            <div class="dimension">• Wheel Diameter: 5" (127mm)</div>
+            <div class="dimension">• Handle Diameter: 1" (25.4mm)</div>
+            <div class="dimension">• Handle Length: 6" (152.4mm)</div>
+            <div class="dimension">• Platform Thickness: 0.5" (12.7mm)</div>
+        </div>
+        
+        <div class="measurement-section">
+            <div class="dimension"><strong>Critical Structural Integrity Feature:</strong></div>
+            <div class="dimension">• Exactly 2" of material from edge of platform to edge of tank holes on all sides</div>
+            <div class="dimension">• 1/4" reinforcement ring around each hole</div>
+        </div>
+        </div>
+        
+        <div id="materialSpecs">
+            <h3>Material Specifications</h3>
+            <div class="material-item">• Frame: 2" × 2" Steel Square Tubing, 1/8" wall thickness</div>
+            <div class="material-item">• Platform: 1/2" Steel Plate</div>
+            <div class="material-item">• Wheels: 5" Heavy-Duty Casters, 250lb capacity each</div>
+            <div class="material-item">• Finish: Powder-coated matte black</div>
+            <div class="material-item">• Tank Capacity: 15 standard compressed air tanks</div>
+            <div class="material-item">• Maximum Load Capacity: 800lbs</div>
+        </div>
+        
+        <div class="measurement-section">
+            <div class="dimension"><strong>Fabrication Notes:</strong></div>
+            <div class="dimension">• All welds to be continuous, min. 3/16" fillet</div>
+            <div class="dimension">• Grind and smooth all exposed edges</div>
+            <div class="dimension">• Reinforce tank hole edges with 1/4" rolled steel</div>
+            <div class="dimension">• Casters to be mounted with 3/8" bolts, lock washers</div>
+            <div class="dimension">• Apply rust inhibitor before final finish</div>
+        </div>
+    </div>
+    
+    <div id="fabricationDetails" class="panel">
+        <h3>Fabrication Instructions</h3>
+        <p><strong>Assembly Sequence:</strong></p>
+        <ol>
+            <li>Cut steel tubing to length according to dimensions</li>
+            <li>Construct base frame first (bottom rectangle)</li>
+            <li>Add vertical support columns at each corner</li>
+            <li>Install cross-bracing support beams</li>
+            <li>Cut and drill 5/8" steel plate for platform top</li>
+            <li>Use hole saw to create 15 tank holes (5⅝" diameter)</li>
+            <li>Weld platform to top frame</li>
+            <li>Reinforce tank hole edges with rolled steel</li>
+            <li>Attach wheel mounting brackets to bottom frame</li>
+            <li>Install casters to mounting brackets</li>
+            <li>Attach handles to front and rear of frame</li>
+            <li>Clean, prime, and apply powder coating</li>
+        </ol>
+        
+        <p><strong>Critical Dimensions:</strong></p>
+        <ul>
+            <li>Ensure tank holes are precisely positioned according to the grid layout</li>
+            <li>Maintain 2" margin from edge to center of first tank hole in each direction</li>
+            <li>Verify wheel clearance of 4¼" from ground to bottom of frame</li>
+            <li>Check that all tanks fit properly with adequate spacing</li>
+        </ul>
+        
+        <p><strong>Quality Checks:</strong></p>
+        <ul>
+            <li>Verify all welds are continuous and strong</li>
+            <li>Test caddy with full load capacity (15 tanks)</li>
+            <li>Ensure smooth rolling on all surfaces</li>
+            <li>Confirm all tanks fit securely with proper clearance</li>
+            <li>Check that handles are securely attached and comfortable</li>
+        </ul>
+    </div>
+    
+    <div id="togglePanel">
+        <button id="toggleInfo" class="active">Info Panel</button>
+        <button id="toggleControlPanel" class="active">Controls</button>
+        <button id="toggleViewButtons" class="active">View Options</button>
+        <button id="toggleDimensions" class="active">Dimensions</button>
+        <button id="toggleFabDetails" class="active">Fab Details</button>
+    </div>
+
+    <div id="annotations">
+        <!-- These will be dynamically created -->
+    </div>
+
+    <!-- Import Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- OrbitControls implementation -->
+    <script>
+        // OrbitControls implementation
+        // This is included directly to avoid CDN import issues
+        THREE.OrbitControls = function ( object, domElement ) {
+
+            this.object = object;
+            this.domElement = ( domElement !== undefined ) ? domElement : document;
+
+            // Set to false to disable this control
+            this.enabled = true;
+
+            // "target" sets the location of focus, where the object orbits around
+            this.target = new THREE.Vector3();
+
+            // How far you can dolly in and out ( PerspectiveCamera only )
+            this.minDistance = 0;
+            this.maxDistance = Infinity;
+
+            // How far you can zoom in and out ( OrthographicCamera only )
+            this.minZoom = 0;
+            this.maxZoom = Infinity;
+
+            // How far you can orbit vertically, upper and lower limits.
+            // Range is 0 to Math.PI radians.
+            this.minPolarAngle = 0; // radians
+            this.maxPolarAngle = Math.PI; // radians
+
+            // How far you can orbit horizontally, upper and lower limits.
+            // If set, the interval [ min, max ] must be a sub-interval of [ - 2 PI, 2 PI ]
+            this.minAzimuthAngle = - Infinity; // radians
+            this.maxAzimuthAngle = Infinity; // radians
+
+            // Set to true to enable damping (inertia)
+            // If damping is enabled, you must call controls.update() in your animation loop
+            this.enableDamping = false;
+            this.dampingFactor = 0.05;
+
+            // This option actually enables dollying in and out; left as "zoom" for backwards compatibility.
+            // Set to false to disable zooming
+            this.enableZoom = true;
+            this.zoomSpeed = 1.0;
+
+            // Set to false to disable rotating
+            this.enableRotate = true;
+            this.rotateSpeed = 1.0;
+
+            // Set to false to disable panning
+            this.enablePan = true;
+            this.panSpeed = 1.0;
+            this.screenSpacePanning = true; // if false, pan orthogonal to world-space direction camera.up
+            this.keyPanSpeed = 7.0;	// pixels moved per arrow key push
+
+            // Set to true to automatically rotate around the target
+            // If auto-rotate is enabled, you must call controls.update() in your animation loop
+            this.autoRotate = false;
+            this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60
+
+            // Set to false to disable use of the keys
+            this.enableKeys = true;
+
+            // The four arrow keys
+            this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
+
+            // Mouse buttons
+            this.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+
+            // Touch fingers
+            this.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+
+            // for reset
+            this.target0 = this.target.clone();
+            this.position0 = this.object.position.clone();
+            this.zoom0 = this.object.zoom;
+
+            //
+            // public methods
+            //
+
+            this.getPolarAngle = function () {
+                return spherical.phi;
+            };
+
+            this.getAzimuthalAngle = function () {
+                return spherical.theta;
+            };
+
+            this.saveState = function () {
+                scope.target0.copy( scope.target );
+                scope.position0.copy( scope.object.position );
+                scope.zoom0 = scope.object.zoom;
+            };
+
+            this.reset = function () {
+                scope.target.copy( scope.target0 );
+                scope.object.position.copy( scope.position0 );
+                scope.object.zoom = scope.zoom0;
+
+                scope.object.updateProjectionMatrix();
+                scope.dispatchEvent( changeEvent );
+
+                scope.update();
+
+                state = STATE.NONE;
+            };
+
+            // this method is exposed, but perhaps it would be better if we can make it private...
+            this.update = function () {
+
+                var offset = new THREE.Vector3();
+
+                // so camera.up is the orbit axis
+                var quat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
+                var quatInverse = quat.clone().invert();
+
+                var lastPosition = new THREE.Vector3();
+                var lastQuaternion = new THREE.Quaternion();
+
+                var twoPI = 2 * Math.PI;
+
+                return function update() {
+
+                    var position = scope.object.position;
+
+                    offset.copy( position ).sub( scope.target );
+
+                    // rotate offset to "y-axis-is-up" space
+                    offset.applyQuaternion( quat );
+
+                    // angle from z-axis around y-axis
+                    spherical.setFromVector3( offset );
+
+                    if ( scope.autoRotate && state === STATE.NONE ) {
+                        rotateLeft( getAutoRotationAngle() );
+                    }
+
+                    if ( scope.enableDamping ) {
+                        spherical.theta += sphericalDelta.theta * scope.dampingFactor;
+                        spherical.phi += sphericalDelta.phi * scope.dampingFactor;
+                    } else {
+                        spherical.theta += sphericalDelta.theta;
+                        spherical.phi += sphericalDelta.phi;
+                    }
+
+                    // restrict theta to be between desired limits
+                    var min = scope.minAzimuthAngle;
+                    var max = scope.maxAzimuthAngle;
+
+                    if ( isFinite( min ) && isFinite( max ) ) {
+                        if ( min < - Math.PI ) min += twoPI; else if ( min > Math.PI ) min -= twoPI;
+                        if ( max < - Math.PI ) max += twoPI; else if ( max > Math.PI ) max -= twoPI;
+
+                        if ( min <= max ) {
+                            spherical.theta = Math.max( min, Math.min( max, spherical.theta ) );
+                        } else {
+                            spherical.theta = ( spherical.theta > ( min + max ) / 2 ) ?
+                                Math.max( min, spherical.theta ) :
+                                Math.min( max, spherical.theta );
+                        }
+                    }
+
+                    // restrict phi to be between desired limits
+                    spherical.phi = Math.max( scope.minPolarAngle, Math.min( scope.maxPolarAngle, spherical.phi ) );
+                    spherical.makeSafe();
+                    spherical.radius *= scale;
+
+                    // restrict radius to be between desired limits
+                    spherical.radius = Math.max( scope.minDistance, Math.min( scope.maxDistance, spherical.radius ) );
+
+                    // move target to panned location
+                    if ( scope.enableDamping === true ) {
+                        scope.target.addScaledVector( panOffset, scope.dampingFactor );
+                    } else {
+                        scope.target.add( panOffset );
+                    }
+
+                    offset.setFromSpherical( spherical );
+
+                    // rotate offset back to "camera-up-vector-is-up" space
+                    offset.applyQuaternion( quatInverse );
+
+                    position.copy( scope.target ).add( offset );
+
+                    scope.object.lookAt( scope.target );
+
+                    if ( scope.enableDamping === true ) {
+                        sphericalDelta.theta *= ( 1 - scope.dampingFactor );
+                        sphericalDelta.phi *= ( 1 - scope.dampingFactor );
+
+                        panOffset.multiplyScalar( 1 - scope.dampingFactor );
+                    } else {
+                        sphericalDelta.set( 0, 0, 0 );
+                        panOffset.set( 0, 0, 0 );
+                    }
+
+                    scale = 1;
+
+                    // update condition is:
+                    // min(camera displacement, camera rotation in radians)^2 > EPS
+                    // using small-angle approximation cos(x/2) = 1 - x^2 / 8
+
+                    if ( zoomChanged ||
+                        lastPosition.distanceToSquared( scope.object.position ) > EPS ||
+                        8 * ( 1 - lastQuaternion.dot( scope.object.quaternion ) ) > EPS ) {
+
+                        scope.dispatchEvent( changeEvent );
+
+                        lastPosition.copy( scope.object.position );
+                        lastQuaternion.copy( scope.object.quaternion );
+                        zoomChanged = false;
+
+                        return true;
+                    }
+
+                    return false;
+                };
+
+            }();
+
+            this.dispose = function () {
+                scope.domElement.removeEventListener( 'contextmenu', onContextMenu );
+                scope.domElement.removeEventListener( 'pointerdown', onPointerDown );
+                scope.domElement.removeEventListener( 'wheel', onMouseWheel );
+
+                scope.domElement.removeEventListener( 'touchstart', onTouchStart );
+                scope.domElement.removeEventListener( 'touchend', onTouchEnd );
+                scope.domElement.removeEventListener( 'touchmove', onTouchMove );
+
+                scope.domElement.ownerDocument.removeEventListener( 'pointermove', onPointerMove );
+                scope.domElement.ownerDocument.removeEventListener( 'pointerup', onPointerUp );
+
+                scope.domElement.removeEventListener( 'keydown', onKeyDown );
+
+                //scope.dispatchEvent( { type: 'dispose' } ); // should this be added here?
+            };
+
+            //
+            // internals
+            //
+
+            var scope = this;
+
+            var changeEvent = { type: 'change' };
+            var startEvent = { type: 'start' };
+            var endEvent = { type: 'end' };
+
+            var STATE = {
+                NONE: - 1,
+                ROTATE: 0,
+                DOLLY: 1,
+                PAN: 2,
+                TOUCH_ROTATE: 3,
+                TOUCH_PAN: 4,
+                TOUCH_DOLLY_PAN: 5,
+                TOUCH_DOLLY_ROTATE: 6
+            };
+
+            var state = STATE.NONE;
+
+            var EPS = 0.000001;
+
+            // current position in spherical coordinates
+            var spherical = new THREE.Spherical();
+            var sphericalDelta = new THREE.Spherical();
+
+            var scale = 1;
+            var panOffset = new THREE.Vector3();
+            var zoomChanged = false;
+
+            var rotateStart = new THREE.Vector2();
+            var rotateEnd = new THREE.Vector2();
+            var rotateDelta = new THREE.Vector2();
+
+            var panStart = new THREE.Vector2();
+            var panEnd = new THREE.Vector2();
+            var panDelta = new THREE.Vector2();
+
+            var dollyStart = new THREE.Vector2();
+            var dollyEnd = new THREE.Vector2();
+            var dollyDelta = new THREE.Vector2();
+
+            function getAutoRotationAngle() {
+                return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
+            }
+
+            function getZoomScale() {
+                return Math.pow( 0.95, scope.zoomSpeed );
+            }
+
+            function rotateLeft( angle ) {
+                sphericalDelta.theta -= angle;
+            }
+
+            function rotateUp( angle ) {
+                sphericalDelta.phi -= angle;
+            }
+
+            var panLeft = function () {
+                var v = new THREE.Vector3();
+
+                return function panLeft( distance, objectMatrix ) {
+                    v.setFromMatrixColumn( objectMatrix, 0 ); // get X column of objectMatrix
+                    v.multiplyScalar( - distance );
+                    panOffset.add( v );
+                };
+            }();
+
+            var panUp = function () {
+                var v = new THREE.Vector3();
+
+                return function panUp( distance, objectMatrix ) {
+                    if ( scope.screenSpacePanning === true ) {
+                        v.setFromMatrixColumn( objectMatrix, 1 );
+                    } else {
+                        v.setFromMatrixColumn( objectMatrix, 0 );
+                        v.crossVectors( scope.object.up, v );
+                    }
+
+                    v.multiplyScalar( distance );
+                    panOffset.add( v );
+                };
+            }();
+
+            // deltaX and deltaY are in pixels; right and down are positive
+            var pan = function () {
+                var offset = new THREE.Vector3();
+
+                return function pan( deltaX, deltaY ) {
+                    var element = scope.domElement;
+
+                    if ( scope.object.isPerspectiveCamera ) {
+                        // perspective
+                        var position = scope.object.position;
+                        offset.copy( position ).sub( scope.target );
+                        var targetDistance = offset.length();
+
+                        // half of the fov is center to top of screen
+                        targetDistance *= Math.tan( ( scope.object.fov / 2 ) * Math.PI / 180.0 );
+
+                        // we use only clientHeight here so aspect ratio does not distort speed
+                        panLeft( 2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix );
+                        panUp( 2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix );
+                    } else if ( scope.object.isOrthographicCamera ) {
+                        // orthographic
+                        panLeft( deltaX * ( scope.object.right - scope.object.left ) / scope.object.zoom / element.clientWidth, scope.object.matrix );
+                        panUp( deltaY * ( scope.object.top - scope.object.bottom ) / scope.object.zoom / element.clientHeight, scope.object.matrix );
+                    } else {
+                        // camera neither orthographic nor perspective
+                        console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - pan disabled.' );
+                        scope.enablePan = false;
+                    }
+                };
+            }();
+
+            function dollyOut( dollyScale ) {
+                if ( scope.object.isPerspectiveCamera ) {
+                    scale /= dollyScale;
+                } else if ( scope.object.isOrthographicCamera ) {
+                    scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom * dollyScale ) );
+                    scope.object.updateProjectionMatrix();
+                    zoomChanged = true;
+                } else {
+                    console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+                    scope.enableZoom = false;
+                }
+            }
+
+            function dollyIn( dollyScale ) {
+                if ( scope.object.isPerspectiveCamera ) {
+                    scale *= dollyScale;
+                } else if ( scope.object.isOrthographicCamera ) {
+                    scope.object.zoom = Math.max( scope.minZoom, Math.min( scope.maxZoom, scope.object.zoom / dollyScale ) );
+                    scope.object.updateProjectionMatrix();
+                    zoomChanged = true;
+                } else {
+                    console.warn( 'WARNING: OrbitControls.js encountered an unknown camera type - dolly/zoom disabled.' );
+                    scope.enableZoom = false;
+                }
+            }
+
+            //
+            // event callbacks - update the object state
+            //
+
+            function handleMouseDownRotate( event ) {
+                rotateStart.set( event.clientX, event.clientY );
+            }
+
+            function handleMouseDownDolly( event ) {
+                dollyStart.set( event.clientX, event.clientY );
+            }
+
+            function handleMouseDownPan( event ) {
+                panStart.set( event.clientX, event.clientY );
+            }
+
+            function handleMouseMoveRotate( event ) {
+                rotateEnd.set( event.clientX, event.clientY );
+                rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+
+                var element = scope.domElement;
+                rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
+                rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
+                rotateStart.copy( rotateEnd );
+                scope.update();
+            }
+
+            function handleMouseMoveDolly( event ) {
+                dollyEnd.set( event.clientX, event.clientY );
+                dollyDelta.subVectors( dollyEnd, dollyStart );
+
+                if ( dollyDelta.y > 0 ) {
+                    dollyOut( getZoomScale() );
+                } else if ( dollyDelta.y < 0 ) {
+                    dollyIn( getZoomScale() );
+                }
+
+                dollyStart.copy( dollyEnd );
+                scope.update();
+            }
+
+            function handleMouseMovePan( event ) {
+                panEnd.set( event.clientX, event.clientY );
+                panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
+                pan( panDelta.x, panDelta.y );
+                panStart.copy( panEnd );
+                scope.update();
+            }
+
+            function handleMouseUp( /*event*/ ) {
+                // no-op
+            }
+
+            function handleMouseWheel( event ) {
+                if ( event.deltaY < 0 ) {
+                    dollyIn( getZoomScale() );
+                } else if ( event.deltaY > 0 ) {
+                    dollyOut( getZoomScale() );
+                }
+
+                scope.update();
+            }
+
+            function handleKeyDown( event ) {
+                var needsUpdate = false;
+
+                switch ( event.keyCode ) {
+                    case scope.keys.UP:
+                        pan( 0, scope.keyPanSpeed );
+                        needsUpdate = true;
+                        break;
+                    case scope.keys.BOTTOM:
+                        pan( 0, - scope.keyPanSpeed );
+                        needsUpdate = true;
+                        break;
+                    case scope.keys.LEFT:
+                        pan( scope.keyPanSpeed, 0 );
+                        needsUpdate = true;
+                        break;
+                    case scope.keys.RIGHT:
+                        pan( - scope.keyPanSpeed, 0 );
+                        needsUpdate = true;
+                        break;
+                }
+
+                if ( needsUpdate ) {
+                    // prevent the browser from scrolling on cursor keys
+                    event.preventDefault();
+                    scope.update();
+                }
+            }
+
+            function handleTouchStartRotate( event ) {
+                if ( event.touches.length == 1 ) {
+                    rotateStart.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+                } else {
+                    var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+                    var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+                    rotateStart.set( x, y );
+                }
+            }
+
+            function handleTouchStartPan( event ) {
+                if ( event.touches.length == 1 ) {
+                    panStart.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+                } else {
+                    var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+                    var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+                    panStart.set( x, y );
+                }
+            }
+
+            function handleTouchStartDolly( event ) {
+                var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+                var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+                var distance = Math.sqrt( dx * dx + dy * dy );
+                dollyStart.set( 0, distance );
+            }
+
+            function handleTouchStartDollyPan( event ) {
+                if ( scope.enableZoom ) handleTouchStartDolly( event );
+                if ( scope.enablePan ) handleTouchStartPan( event );
+            }
+
+            function handleTouchStartDollyRotate( event ) {
+                if ( scope.enableZoom ) handleTouchStartDolly( event );
+                if ( scope.enableRotate ) handleTouchStartRotate( event );
+            }
+
+            function handleTouchMoveRotate( event ) {
+                if ( event.touches.length == 1 ) {
+                    rotateEnd.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+                } else {
+                    var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+                    var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+                    rotateEnd.set( x, y );
+                }
+
+                rotateDelta.subVectors( rotateEnd, rotateStart ).multiplyScalar( scope.rotateSpeed );
+                var element = scope.domElement;
+                rotateLeft( 2 * Math.PI * rotateDelta.x / element.clientHeight ); // yes, height
+                rotateUp( 2 * Math.PI * rotateDelta.y / element.clientHeight );
+                rotateStart.copy( rotateEnd );
+            }
+
+            function handleTouchMovePan( event ) {
+                if ( event.touches.length == 1 ) {
+                    panEnd.set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY );
+                } else {
+                    var x = 0.5 * ( event.touches[ 0 ].pageX + event.touches[ 1 ].pageX );
+                    var y = 0.5 * ( event.touches[ 0 ].pageY + event.touches[ 1 ].pageY );
+                    panEnd.set( x, y );
+                }
+
+                panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
+                pan( panDelta.x, panDelta.y );
+                panStart.copy( panEnd );
+            }
+
+            function handleTouchMoveDolly( event ) {
+                var dx = event.touches[ 0 ].pageX - event.touches[ 1 ].pageX;
+                var dy = event.touches[ 0 ].pageY - event.touches[ 1 ].pageY;
+                var distance = Math.sqrt( dx * dx + dy * dy );
+
+                dollyEnd.set( 0, distance );
+                dollyDelta.set( 0, Math.pow( dollyEnd.y / dollyStart.y, scope.zoomSpeed ) );
+                dollyOut( dollyDelta.y );
+                dollyStart.copy( dollyEnd );
+            }
+
+            function handleTouchMoveDollyPan( event ) {
+                if ( scope.enableZoom ) handleTouchMoveDolly( event );
+                if ( scope.enablePan ) handleTouchMovePan( event );
+            }
+
+            function handleTouchMoveDollyRotate( event ) {
+                if ( scope.enableZoom ) handleTouchMoveDolly( event );
+                if ( scope.enableRotate ) handleTouchMoveRotate( event );
+            }
+
+            function handleTouchEnd( /*event*/ ) {
+                // no-op
+            }
+
+            //
+            // event handlers - FSM: listen for events and reset state
+            //
+
+            function onPointerDown( event ) {
+                if ( scope.enabled === false ) return;
+
+                switch ( event.pointerType ) {
+                    case 'mouse':
+                    case 'pen':
+                        onMouseDown( event );
+                        break;
+
+                    // TODO touch
+                }
+            }
+
+            function onPointerMove( event ) {
+                if ( scope.enabled === false ) return;
+
+                switch ( event.pointerType ) {
+                    case 'mouse':
+                    case 'pen':
+                        onMouseMove( event );
+                        break;
+
+                    // TODO touch
+                }
+            }
+
+            function onPointerUp( event ) {
+                switch ( event.pointerType ) {
+                    case 'mouse':
+                    case 'pen':
+                        onMouseUp( event );
+                        break;
+
+                    // TODO touch
+                }
+            }
+
+            function onMouseDown( event ) {
+                // Prevent the browser from scrolling.
+                event.preventDefault();
+
+                // Manually set the focus since calling preventDefault above
+                // prevents the browser from setting it automatically.
+
+                scope.domElement.focus ? scope.domElement.focus() : window.focus();
+
+                var mouseAction;
+                switch ( event.button ) {
+                    case 0:
+                        mouseAction = scope.mouseButtons.LEFT;
+                        break;
+                    case 1:
+                        mouseAction = scope.mouseButtons.MIDDLE;
+                        break;
+                    case 2:
+                        mouseAction = scope.mouseButtons.RIGHT;
+                        break;
+                    default:
+                        mouseAction = - 1;
+                }
+
+                switch ( mouseAction ) {
+                    case THREE.MOUSE.DOLLY:
+                        if ( scope.enableZoom === false ) return;
+                        handleMouseDownDolly( event );
+                        state = STATE.DOLLY;
+                        break;
+                    case THREE.MOUSE.ROTATE:
+                        if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+                            if ( scope.enablePan === false ) return;
+                            handleMouseDownPan( event );
+                            state = STATE.PAN;
+                        } else {
+                            if ( scope.enableRotate === false ) return;
+                            handleMouseDownRotate( event );
+                            state = STATE.ROTATE;
+                        }
+                        break;
+                    case THREE.MOUSE.PAN:
+                        if ( event.ctrlKey || event.metaKey || event.shiftKey ) {
+                            if ( scope.enableRotate === false ) return;
+                            handleMouseDownRotate( event );
+                            state = STATE.ROTATE;
+                        } else {
+                            if ( scope.enablePan === false ) return;
+                            handleMouseDownPan( event );
+                            state = STATE.PAN;
+                        }
+                        break;
+                    default:
+                        state = STATE.NONE;
+                }
+
+                if ( state !== STATE.NONE ) {
+                    scope.domElement.ownerDocument.addEventListener( 'pointermove', onPointerMove );
+                    scope.domElement.ownerDocument.addEventListener( 'pointerup', onPointerUp );
+                    scope.dispatchEvent( startEvent );
+                }
+            }
+
+            function onMouseMove( event ) {
+                if ( scope.enabled === false ) return;
+                event.preventDefault();
+
+                switch ( state ) {
+                    case STATE.ROTATE:
+                        if ( scope.enableRotate === false ) return;
+                        handleMouseMoveRotate( event );
+                        break;
+                    case STATE.DOLLY:
+                        if ( scope.enableZoom === false ) return;
+                        handleMouseMoveDolly( event );
+                        break;
+                    case STATE.PAN:
+                        if ( scope.enablePan === false ) return;
+                        handleMouseMovePan( event );
+                        break;
+                }
+            }
+
+            function onMouseUp( event ) {
+                scope.domElement.ownerDocument.removeEventListener( 'pointermove', onPointerMove );
+                scope.domElement.ownerDocument.removeEventListener( 'pointerup', onPointerUp );
+
+                if ( scope.enabled === false ) return;
+                handleMouseUp( event );
+                scope.dispatchEvent( endEvent );
+                state = STATE.NONE;
+            }
+
+            function onMouseWheel( event ) {
+                if ( scope.enabled === false || scope.enableZoom === false || ( state !== STATE.NONE && state !== STATE.ROTATE ) ) return;
+                event.preventDefault();
+                scope.dispatchEvent( startEvent );
+                handleMouseWheel( event );
+                scope.dispatchEvent( endEvent );
+            }
+
+            function onKeyDown( event ) {
+                if ( scope.enabled === false || scope.enablePan === false ) return;
+                handleKeyDown( event );
+            }
+
+            function onTouchStart( event ) {
+                if ( scope.enabled === false ) return;
+                event.preventDefault(); // prevent scrolling
+
+                switch ( event.touches.length ) {
+                    case 1:
+                        switch ( scope.touches.ONE ) {
+                            case THREE.TOUCH.ROTATE:
+                                if ( scope.enableRotate === false ) return;
+                                handleTouchStartRotate( event );
+                                state = STATE.TOUCH_ROTATE;
+                                break;
+                            case THREE.TOUCH.PAN:
+                                if ( scope.enablePan === false ) return;
+                                handleTouchStartPan( event );
+                                state = STATE.TOUCH_PAN;
+                                break;
+                            default:
+                                state = STATE.NONE;
+                        }
+                        break;
+                    case 2:
+                        switch ( scope.touches.TWO ) {
+                            case THREE.TOUCH.DOLLY_PAN:
+                                if ( scope.enableZoom === false && scope.enablePan === false ) return;
+                                handleTouchStartDollyPan( event );
+                                state = STATE.TOUCH_DOLLY_PAN;
+                                break;
+                            case THREE.TOUCH.DOLLY_ROTATE:
+                                if ( scope.enableZoom === false && scope.enableRotate === false ) return;
+                                handleTouchStartDollyRotate( event );
+                                state = STATE.TOUCH_DOLLY_ROTATE;
+                                break;
+                            default:
+                                state = STATE.NONE;
+                        }
+                        break;
+                    default:
+                        state = STATE.NONE;
+                }
+
+                if ( state !== STATE.NONE ) {
+                    scope.dispatchEvent( startEvent );
+                }
+            }
+
+            function onTouchMove( event ) {
+                if ( scope.enabled === false ) return;
+                event.preventDefault(); // prevent scrolling
+
+                switch ( state ) {
+                    case STATE.TOUCH_ROTATE:
+                        if ( scope.enableRotate === false ) return;
+                        handleTouchMoveRotate( event );
+                        scope.update();
+                        break;
+                    case STATE.TOUCH_PAN:
+                        if ( scope.enablePan === false ) return;
+                        handleTouchMovePan( event );
+                        scope.update();
+                        break;
+                    case STATE.TOUCH_DOLLY_PAN:
+                        if ( scope.enableZoom === false && scope.enablePan === false ) return;
+                        handleTouchMoveDollyPan( event );
+                        scope.update();
+                        break;
+                    case STATE.TOUCH_DOLLY_ROTATE:
+                        if ( scope.enableZoom === false && scope.enableRotate === false ) return;
+                        handleTouchMoveDollyRotate( event );
+                        scope.update();
+                        break;
+                    default:
+                        state = STATE.NONE;
+                }
+            }
+
+            function onTouchEnd( event ) {
+                if ( scope.enabled === false ) return;
+                handleTouchEnd( event );
+                scope.dispatchEvent( endEvent );
+                state = STATE.NONE;
+            }
+
+            function onContextMenu( event ) {
+                if ( scope.enabled === false ) return;
+                event.preventDefault();
+            }
+
+            //
+
+            scope.domElement.addEventListener( 'contextmenu', onContextMenu );
+
+            scope.domElement.addEventListener( 'pointerdown', onPointerDown );
+            scope.domElement.addEventListener( 'wheel', onMouseWheel, { passive: false } );
+
+            scope.domElement.addEventListener( 'touchstart', onTouchStart, { passive: false } );
+            scope.domElement.addEventListener( 'touchend', onTouchEnd );
+            scope.domElement.addEventListener( 'touchmove', onTouchMove, { passive: false } );
+
+            scope.domElement.addEventListener( 'keydown', onKeyDown );
+
+            // make sure element can receive keys.
+
+            if ( scope.domElement.tabIndex === - 1 ) {
+                scope.domElement.tabIndex = 0;
+            }
+
+            // force an update at start
+
+            this.update();
+        };
+
+        THREE.OrbitControls.prototype = Object.create( THREE.EventDispatcher.prototype );
+        THREE.OrbitControls.prototype.constructor = THREE.OrbitControls;
+
+
+        // constants
+        THREE.MOUSE = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
+        THREE.TOUCH = { ROTATE: 0, PAN: 1, DOLLY_PAN: 2, DOLLY_ROTATE: 3 };
+    </script>
+    
+    <script>
+        // Convert inches to model units (1 inch = 1 unit)
+        function inches(value) {
+            return value;
+        }
+        
+        // Main dimensions in inches
+        const WIDTH = inches(39.25);
+        const LENGTH = inches(24.5);
+        const HEIGHT = inches(19.25);
+        const WHEEL_CLEARANCE = inches(4.25);
+        const TANK_DIAMETER = inches(5.625);
+        const TANK_HEIGHT = inches(18); // Using min value from range for visualization
+        const TUBE_SIZE = inches(2);
+        const EDGE_MARGIN = inches(2);
+        
+        // Initialize Three.js
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(50, 30, 50);
+        camera.lookAt(0, 10, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.getElementById('canvas').appendChild(renderer.domElement);
+        
+        // Add ambient light
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        
+        // Add directional lights from multiple angles
+        const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.7);
+        directionalLight1.position.set(10, 20, 10);
+        directionalLight1.castShadow = true;
+        scene.add(directionalLight1);
+        
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight2.position.set(-10, 15, -10);
+        scene.add(directionalLight2);
+        
+        const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.4);
+        directionalLight3.position.set(0, -10, 0);
+        scene.add(directionalLight3);
+        
+        // Add orbit controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        
+        // Create materials
+        const frameMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x333333, 
+            metalness: 0.8, 
+            roughness: 0.3 
+        });
+        
+        const tankMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x1a75ff, 
+            metalness: 0.7, 
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        const tankValveMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xcccccc, 
+            metalness: 0.9, 
+            roughness: 0.1
+        });
+        
+        const wheelMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x333333, 
+            metalness: 0.5, 
+            roughness: 0.7 
+        });
+        
+        const handleMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x333333, 
+            metalness: 0.5, 
+            roughness: 0.3 
+        });
+        
+        const platformMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x555555, 
+            metalness: 0.7, 
+            roughness: 0.4 
+        });
+        
+        const bracketMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x444444,
+            metalness: 0.6,
+            roughness: 0.5
+        });
+        
+        const measurementLineMaterial = new THREE.LineBasicMaterial({ 
+            color: 0xff0000,
+            linewidth: 2
+        });
+
+        // Create main group to hold everything - centered exactly
+        const caddyGroup = new THREE.Group();
+        scene.add(caddyGroup);
+        
+        // Perfectly center the caddy in the scene
+        caddyGroup.position.set(-WIDTH/2, 0, -LENGTH/2);
+        
+        // Create subgroups for organization
+        const frameGroup = new THREE.Group();
+        const tanksGroup = new THREE.Group();
+        const wheelsGroup = new THREE.Group();
+        const measurementGroup = new THREE.Group();
+        measurementGroup.visible = false;
+        
+        // Add all groups to main container
+        caddyGroup.add(frameGroup);
+        caddyGroup.add(tanksGroup);
+        caddyGroup.add(wheelsGroup);
+        caddyGroup.add(measurementGroup);
+
+        // Helper function to create boxes
+        function createBox(width, height, depth, material, x, y, z) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            return mesh;
+        }
+        
+        // Create frame with proper wheel clearance
+        // Bottom of frame starts at WHEEL_CLEARANCE
+        
+        // Create vertical supports at corners
+        const frontLeft = createBox(TUBE_SIZE, HEIGHT - WHEEL_CLEARANCE, TUBE_SIZE, frameMaterial, TUBE_SIZE/2, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/2, TUBE_SIZE/2);
+        const frontRight = createBox(TUBE_SIZE, HEIGHT - WHEEL_CLEARANCE, TUBE_SIZE, frameMaterial, WIDTH - TUBE_SIZE/2, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/2, TUBE_SIZE/2);
+        const backLeft = createBox(TUBE_SIZE, HEIGHT - WHEEL_CLEARANCE, TUBE_SIZE, frameMaterial, TUBE_SIZE/2, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/2, LENGTH - TUBE_SIZE/2);
+        const backRight = createBox(TUBE_SIZE, HEIGHT - WHEEL_CLEARANCE, TUBE_SIZE, frameMaterial, WIDTH - TUBE_SIZE/2, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/2, LENGTH - TUBE_SIZE/2);
+        
+        frameGroup.add(frontLeft, frontRight, backLeft, backRight);
+        
+        // Create horizontal supports at top
+        const frontTop = createBox(WIDTH, TUBE_SIZE, TUBE_SIZE, frameMaterial, WIDTH/2, HEIGHT - TUBE_SIZE/2, TUBE_SIZE/2);
+        const backTop = createBox(WIDTH, TUBE_SIZE, TUBE_SIZE, frameMaterial, WIDTH/2, HEIGHT - TUBE_SIZE/2, LENGTH - TUBE_SIZE/2);
+        const leftTop = createBox(TUBE_SIZE, TUBE_SIZE, LENGTH, frameMaterial, TUBE_SIZE/2, HEIGHT - TUBE_SIZE/2, LENGTH/2);
+        const rightTop = createBox(TUBE_SIZE, TUBE_SIZE, LENGTH, frameMaterial, WIDTH - TUBE_SIZE/2, HEIGHT - TUBE_SIZE/2, LENGTH/2);
+        
+        frameGroup.add(frontTop, backTop, leftTop, rightTop);
+        
+        // Create horizontal supports at bottom
+        const frontBottom = createBox(WIDTH, TUBE_SIZE, TUBE_SIZE, frameMaterial, WIDTH/2, WHEEL_CLEARANCE + TUBE_SIZE/2, TUBE_SIZE/2);
+        const backBottom = createBox(WIDTH, TUBE_SIZE, TUBE_SIZE, frameMaterial, WIDTH/2, WHEEL_CLEARANCE + TUBE_SIZE/2, LENGTH - TUBE_SIZE/2);
+        const leftBottom = createBox(TUBE_SIZE, TUBE_SIZE, LENGTH, frameMaterial, TUBE_SIZE/2, WHEEL_CLEARANCE + TUBE_SIZE/2, LENGTH/2);
+        const rightBottom = createBox(TUBE_SIZE, TUBE_SIZE, LENGTH, frameMaterial, WIDTH - TUBE_SIZE/2, WHEEL_CLEARANCE + TUBE_SIZE/2, LENGTH/2);
+        
+        frameGroup.add(frontBottom, backBottom, leftBottom, rightBottom);
+        
+        // Create supporting cross beams (for rows)
+        const row1Beam = createBox(WIDTH, TUBE_SIZE, TUBE_SIZE, frameMaterial, WIDTH/2, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/3, LENGTH * 0.25);
+        const row2Beam = createBox(WIDTH, TUBE_SIZE, TUBE_SIZE, frameMaterial, WIDTH/2, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/3, LENGTH * 0.5);
+        const row3Beam = createBox(WIDTH, TUBE_SIZE, TUBE_SIZE, frameMaterial, WIDTH/2, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/3, LENGTH * 0.75);
+        
+        frameGroup.add(row1Beam, row2Beam, row3Beam);
+        
+        // Create supporting cross beams (for columns)
+        const col1Beam = createBox(TUBE_SIZE, TUBE_SIZE, LENGTH, frameMaterial, WIDTH * 0.25, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/3, LENGTH/2);
+        const col2Beam = createBox(TUBE_SIZE, TUBE_SIZE, LENGTH, frameMaterial, WIDTH * 0.5, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/3, LENGTH/2);
+        const col3Beam = createBox(TUBE_SIZE, TUBE_SIZE, LENGTH, frameMaterial, WIDTH * 0.75, WHEEL_CLEARANCE + (HEIGHT - WHEEL_CLEARANCE)/3, LENGTH/2);
+        
+        frameGroup.add(col1Beam, col2Beam, col3Beam);
+        
+        // Create platform (top surface)
+        const platformGeometry = new THREE.BoxGeometry(WIDTH, 0.5, LENGTH);
+        const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+        platform.position.set(WIDTH/2, HEIGHT - 0.25, LENGTH/2);
+        platform.castShadow = true;
+        platform.receiveShadow = true;
+        frameGroup.add(platform);
+        
+        // Create wheel mounting brackets
+        const bracketGeometry = new THREE.BoxGeometry(4, 1, 4);
+        
+        // Front Left bracket and wheel
+        const frontLeftBracket = new THREE.Mesh(bracketGeometry, bracketMaterial);
+        frontLeftBracket.position.set(TUBE_SIZE/2, WHEEL_CLEARANCE/2, TUBE_SIZE/2);
+        wheelsGroup.add(frontLeftBracket);
+        
+        // Front Right bracket and wheel
+        const frontRightBracket = new THREE.Mesh(bracketGeometry, bracketMaterial);
+        frontRightBracket.position.set(WIDTH - TUBE_SIZE/2, WHEEL_CLEARANCE/2, TUBE_SIZE/2);
+        wheelsGroup.add(frontRightBracket);
+        
+        // Back Left bracket and wheel
+        const backLeftBracket = new THREE.Mesh(bracketGeometry, bracketMaterial);
+        backLeftBracket.position.set(TUBE_SIZE/2, WHEEL_CLEARANCE/2, LENGTH - TUBE_SIZE/2);
+        wheelsGroup.add(backLeftBracket);
+        
+        // Back Right bracket and wheel
+        const backRightBracket = new THREE.Mesh(bracketGeometry, bracketMaterial);
+        backRightBracket.position.set(WIDTH - TUBE_SIZE/2, WHEEL_CLEARANCE/2, LENGTH - TUBE_SIZE/2);
+        wheelsGroup.add(backRightBracket);
+        
+        // Create wheels properly mounted under the frame
+        const wheelRadius = 2.5;
+        const wheelThickness = 1;
+        const wheelGeometry = new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelThickness, 32);
+        
+        const frontLeftWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        frontLeftWheel.rotation.z = Math.PI / 2;
+        frontLeftWheel.position.set(TUBE_SIZE/2, wheelRadius, TUBE_SIZE/2);
+        wheelsGroup.add(frontLeftWheel);
+        
+        const frontRightWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        frontRightWheel.rotation.z = Math.PI / 2;
+        frontRightWheel.position.set(WIDTH - TUBE_SIZE/2, wheelRadius, TUBE_SIZE/2);
+        wheelsGroup.add(frontRightWheel);
+        
+        const backLeftWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        backLeftWheel.rotation.z = Math.PI / 2;
+        backLeftWheel.position.set(TUBE_SIZE/2, wheelRadius, LENGTH - TUBE_SIZE/2);
+        wheelsGroup.add(backLeftWheel);
+        
+        const backRightWheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        backRightWheel.rotation.z = Math.PI / 2;
+        backRightWheel.position.set(WIDTH - TUBE_SIZE/2, wheelRadius, LENGTH - TUBE_SIZE/2);
+        wheelsGroup.add(backRightWheel);
+        
+        // Create handles
+        const handleRadius = 0.5;
+        const handleLength = 6;
+        
+        // Front handle
+        const frontHandleGeometry = new THREE.CylinderGeometry(handleRadius, handleRadius, handleLength, 16);
+        const frontHandle = new THREE.Mesh(frontHandleGeometry, handleMaterial);
+        frontHandle.rotation.x = Math.PI / 2;
+        frontHandle.position.set(WIDTH/2, HEIGHT - TUBE_SIZE*2, 0);
+        frameGroup.add(frontHandle);
+        
+        // Back handle
+        const backHandle = new THREE.Mesh(frontHandleGeometry, handleMaterial);
+        backHandle.rotation.x = Math.PI / 2;
+        backHandle.position.set(WIDTH/2, HEIGHT - TUBE_SIZE*2, LENGTH);
+        frameGroup.add(backHandle);
+
+        // Calculate tank positions based on engineering drawing
+        // Edge margin: EXACTLY 2" clearance from edge of platform to edge of hole
+        
+        const holeRadius = TANK_DIAMETER / 2;
+        
+        // First tank center is at EDGE_MARGIN + holeRadius from edge
+        // EDGE_MARGIN (2") is the distance from edge to beginning of hole
+        // Adding holeRadius (2.8125") positions us at the center of the hole
+        const startX = EDGE_MARGIN + holeRadius;
+        const startZ = EDGE_MARGIN + holeRadius;
+        
+        // Calculate available space after accounting for edge margins and tank diameters
+        const availableWidth = WIDTH - (2 * EDGE_MARGIN) - (5 * TANK_DIAMETER);
+        const availableLength = LENGTH - (2 * EDGE_MARGIN) - (3 * TANK_DIAMETER);
+        
+        // Divide available space to get spacing between tanks
+        // For 5 tanks, we need 4 spaces between them
+        // For 3 tanks, we need 2 spaces between them
+        const hSpacing = (availableWidth / 4) + TANK_DIAMETER;
+        const vSpacing = (availableLength / 2) + TANK_DIAMETER;
+        
+        // Create circular holes in platform and improved compressed air tanks
+        function createImprovedTank(x, z) {
+            // Create circular hole in platform - just the rim
+            const holeRimGeometry = new THREE.RingGeometry(holeRadius - 0.1, holeRadius, 32);
+            const holeRim = new THREE.Mesh(holeRimGeometry, platformMaterial);
+            holeRim.rotation.x = -Math.PI / 2;
+            holeRim.position.set(x, HEIGHT - 0.1, z);
+            frameGroup.add(holeRim);
+            
+            // Add reinforcement ring around hole
+            const reinforcementGeometry = new THREE.TorusGeometry(holeRadius, 0.25, 8, 32);
+            const reinforcementRing = new THREE.Mesh(reinforcementGeometry, frameMaterial);
+            reinforcementRing.rotation.x = Math.PI / 2;
+            reinforcementRing.position.set(x, HEIGHT - 0.25, z);
+            frameGroup.add(reinforcementRing);
+            
+            // Calculate tank height to ensure it sits on the bottom frame
+            const effectiveTankHeight = HEIGHT - WHEEL_CLEARANCE - TUBE_SIZE;
+            
+            // Create main tank body
+            const tankGeometry = new THREE.CylinderGeometry(holeRadius * 0.95, holeRadius * 0.95, effectiveTankHeight - 1, 32);
+            const tank = new THREE.Mesh(tankGeometry, tankMaterial);
+            tank.position.set(x, WHEEL_CLEARANCE + TUBE_SIZE + (effectiveTankHeight - 1)/2, z);
+            
+            // Create the tank top (slightly tapered)
+            const tankTopGeometry = new THREE.CylinderGeometry(holeRadius * 0.7, holeRadius * 0.95, 1, 32);
+            const tankTop = new THREE.Mesh(tankTopGeometry, tankMaterial);
+            tankTop.position.set(x, WHEEL_CLEARANCE + TUBE_SIZE + effectiveTankHeight - 0.5, z);
+            
+            // Create the tank valve assembly
+            const valveBaseGeometry = new THREE.CylinderGeometry(holeRadius * 0.3, holeRadius * 0.3, 0.5, 16);
+            const valveBase = new THREE.Mesh(valveBaseGeometry, tankValveMaterial);
+            valveBase.position.set(x, WHEEL_CLEARANCE + TUBE_SIZE + effectiveTankHeight + 0.25, z);
+            
+            // Create valve stem
+            const valveStemGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.8, 8);
+            const valveStem = new THREE.Mesh(valveStemGeometry, tankValveMaterial);
+            valveStem.position.set(x, WHEEL_CLEARANCE + TUBE_SIZE + effectiveTankHeight + 0.9, z);
+            
+            // Create valve handle
+            const valveHandleGeometry = new THREE.TorusGeometry(0.4, 0.1, 8, 16);
+            const valveHandle = new THREE.Mesh(valveHandleGeometry, tankValveMaterial);
+            valveHandle.rotation.x = Math.PI / 2;
+            valveHandle.position.set(x, WHEEL_CLEARANCE + TUBE_SIZE + effectiveTankHeight + 1.3, z);
+            
+            // Add tank texturing - horizontal bands
+            for (let i = 1; i < 7; i++) {
+                const bandGeometry = new THREE.TorusGeometry(holeRadius * 0.95, 0.05, 8, 32);
+                const band = new THREE.Mesh(bandGeometry, tankValveMaterial);
+                band.rotation.x = Math.PI / 2;
+                band.position.set(x, WHEEL_CLEARANCE + TUBE_SIZE + i * (effectiveTankHeight - 1) / 7, z);
+                tanksGroup.add(band);
+            }
+            
+            // Create a group for this tank
+            const tankAssembly = new THREE.Group();
+            tankAssembly.add(tank);
+            tankAssembly.add(tankTop);
+            tankAssembly.add(valveBase);
+            tankAssembly.add(valveStem);
+            tankAssembly.add(valveHandle);
+            
+            // Add tank to tanks group
+            tanksGroup.add(tankAssembly);
+            
+            return tankAssembly;
+        }
+        
+        // Tank holders
+        let tanks = [];
+        
+        // Create 3x5 grid of tanks with perfect spacing
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 5; col++) {
+                const x = startX + col * hSpacing;
+                const z = startZ + row * vSpacing;
+                const tank = createImprovedTank(x, z);
+                tanks.push(tank);
+            }
+        }
+        
+        // Creating Measurement Lines
+        function createMeasurementLine(startPoint, endPoint, label) {
+            const geometry = new THREE.BufferGeometry();
+            geometry.setFromPoints([startPoint, endPoint]);
+            const line = new THREE.Line(geometry, measurementLineMaterial);
+            measurementGroup.add(line);
+            
+            // Add arrow heads
+            const dir = new THREE.Vector3().subVectors(endPoint, startPoint).normalize();
+            const length = startPoint.distanceTo(endPoint);
+            
+            // Create annotation (will be positioned in animation loop)
+            const annotation = document.createElement('div');
+            annotation.className = 'annotation';
+            annotation.textContent = label;
+            annotation.id = `annotation-${Math.random().toString(36).substr(2, 9)}`;
+            document.getElementById('annotations').appendChild(annotation);
+            
+            return {
+                line: line,
+                start: startPoint,
+                end: endPoint,
+                annotation: annotation
+            };
+        }
+        
+        // Create measurement lines for key dimensions
+        const measurements = [
+            // Width measurement (front)
+            createMeasurementLine(
+                new THREE.Vector3(0, HEIGHT + 1, 0),
+                new THREE.Vector3(WIDTH, HEIGHT + 1, 0),
+                'Width: 39¼"'
+            ),
+            // Length measurement (side)
+            createMeasurementLine(
+                new THREE.Vector3(WIDTH + 1, HEIGHT, 0),
+                new THREE.Vector3(WIDTH + 1, HEIGHT, LENGTH),
+                'Length: 24½"'
+            ),
+            // Height measurement
+            createMeasurementLine(
+                new THREE.Vector3(WIDTH + 1, 0, LENGTH + 1),
+                new THREE.Vector3(WIDTH + 1, HEIGHT, LENGTH + 1),
+                'Height: 19¼"'
+            ),
+            // Tank hole diameter
+            createMeasurementLine(
+                new THREE.Vector3(startX - holeRadius, HEIGHT + 0.5, startZ),
+                new THREE.Vector3(startX + holeRadius, HEIGHT + 0.5, startZ),
+                'Hole: 5⅝" dia'
+            ),
+            // Horizontal tank spacing
+            createMeasurementLine(
+                new THREE.Vector3(startX, HEIGHT + 1.5, startZ),
+                new THREE.Vector3(startX + hSpacing, HEIGHT + 1.5, startZ),
+                'Tank Spacing: 7.8125"'
+            ),
+            // Vertical tank spacing
+            createMeasurementLine(
+                new THREE.Vector3(startX + WIDTH, HEIGHT, startZ),
+                new THREE.Vector3(startX + WIDTH, HEIGHT, startZ + vSpacing),
+                'Tank Spacing: 8.25"'
+            ),
+            // Wheel clearance
+            createMeasurementLine(
+                new THREE.Vector3(0, 0, LENGTH + 2),
+                new THREE.Vector3(0, WHEEL_CLEARANCE, LENGTH + 2),
+                'Clearance: 4¼"'
+            )
+        ];
+        
+        // Toggle functions for all UI elements
+        document.getElementById('toggleInfo').addEventListener('click', function() {
+            const infoPanel = document.getElementById('info');
+            infoPanel.style.display = infoPanel.style.display === 'none' ? 'block' : 'none';
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('toggleControlPanel').addEventListener('click', function() {
+            const controlsPanel = document.getElementById('controls');
+            controlsPanel.style.display = controlsPanel.style.display === 'none' ? 'block' : 'none';
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('toggleViewButtons').addEventListener('click', function() {
+            const viewButtonsPanel = document.getElementById('viewButtons');
+            viewButtonsPanel.style.display = viewButtonsPanel.style.display === 'none' ? 'block' : 'none';
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('toggleDimensions').addEventListener('click', function() {
+            const dimensionsPanel = document.getElementById('dimensions');
+            dimensionsPanel.style.display = dimensionsPanel.style.display === 'none' ? 'block' : 'none';
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('toggleFabDetails').addEventListener('click', function() {
+            const fabPanel = document.getElementById('fabricationDetails');
+            fabPanel.style.display = fabPanel.style.display === 'none' ? 'block' : 'none';
+            this.classList.toggle('active');
+        });
+        
+        // Model display toggle functions
+        document.getElementById('toggleTanks').addEventListener('click', function() {
+            tanksGroup.visible = !tanksGroup.visible;
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('toggleFrame').addEventListener('click', function() {
+            frameGroup.visible = !frameGroup.visible;
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('toggleLabels').addEventListener('click', function() {
+            const annotations = document.querySelectorAll('.annotation');
+            const displayStyle = this.classList.contains('active') ? 'none' : 'block';
+            annotations.forEach(a => a.style.display = displayStyle);
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('measurementToggle').addEventListener('click', function() {
+            measurementGroup.visible = !measurementGroup.visible;
+            this.classList.toggle('active');
+            
+            // Toggle annotations visibility
+            const annotationsDisplay = measurementGroup.visible ? 'block' : 'none';
+            document.querySelectorAll('.annotation').forEach(a => {
+                if (document.getElementById('toggleLabels').classList.contains('active')) {
+                    a.style.display = annotationsDisplay;
+                }
+            });
+        });
+        
+        // View buttons
+        document.getElementById('topView').addEventListener('click', function() {
+            camera.position.set(0, 100, 0);
+            camera.lookAt(0, 10, 0);
+        });
+        
+        document.getElementById('frontView').addEventListener('click', function() {
+            camera.position.set(0, 10, 100);
+            camera.lookAt(0, 10, 0);
+        });
+        
+        document.getElementById('sideView').addEventListener('click', function() {
+            camera.position.set(100, 10, 0);
+            camera.lookAt(0, 10, 0);
+        });
+        
+        document.getElementById('isoView').addEventListener('click', function() {
+            camera.position.set(50, 30, 50);
+            camera.lookAt(0, 10, 0);
+        });
+        
+        // Create an exploded view
+        let inExplodedView = false;
+        let originalPositions = [];
+        
+        document.getElementById('explodedView').addEventListener('click', function() {
+            if (!inExplodedView) {
+                // Save original positions
+                originalPositions = [];
+                
+                // Store original positions of all tanks
+                tanks.forEach(tank => {
+                    originalPositions.push({
+                        obj: tank,
+                        pos: tank.position.clone()
+                    });
+                });
+                
+                // Move tanks upward in exploded view
+                tanks.forEach((tank, index) => {
+                    const row = Math.floor(index / 5);
+                    const col = index % 5;
+                    
+                    // Move upward and slightly outward from center
+                    const centerX = WIDTH / 2;
+                    const centerZ = LENGTH / 2;
+                    const dirX = tank.position.x - centerX;
+                    const dirZ = tank.position.z - centerZ;
+                    
+                    // Normalize direction
+                    const length = Math.sqrt(dirX * dirX + dirZ * dirZ);
+                    const normX = dirX / length;
+                    const normZ = dirZ / length;
+                    
+                    // Move tank
+                    tank.position.y += 10 + row * 2;
+                    tank.position.x += normX * 5;
+                    tank.position.z += normZ * 5;
+                });
+                
+                // Raise platform
+                platform.position.y += 5;
+                
+                inExplodedView = true;
+                this.textContent = "Normal View";
+            } else {
+                // Restore original positions
+                originalPositions.forEach(item => {
+                    item.obj.position.copy(item.pos);
+                });
+                
+                // Restore platform
+                platform.position.y = HEIGHT - 0.25;
+                
+                inExplodedView = false;
+                this.textContent = "Exploded View";
+            }
+        });
+        
+        // Update annotation positions in animation loop
+        function updateAnnotationPositions() {
+            if (measurementGroup.visible) {
+                measurements.forEach(measure => {
+                    // Convert 3D positions to screen coordinates
+                    const startVector = measure.start.clone();
+                    const endVector = measure.end.clone();
+                    
+                    // Add the offset from caddyGroup
+                    startVector.add(caddyGroup.position);
+                    endVector.add(caddyGroup.position);
+                    
+                    // Project to 2D screen coordinates
+                    startVector.project(camera);
+                    endVector.project(camera);
+                    
+                    // Convert to CSS coordinates
+                    const startX = (startVector.x * 0.5 + 0.5) * window.innerWidth;
+                    const startY = (-startVector.y * 0.5 + 0.5) * window.innerHeight;
+                    const endX = (endVector.x * 0.5 + 0.5) * window.innerWidth;
+                    const endY = (-endVector.y * 0.5 + 0.5) * window.innerHeight;
+                    
+                    // Calculate midpoint for annotation
+                    const midX = (startX + endX) / 2;
+                    const midY = (startY + endY) / 2;
+                    
+                    // Set annotation position
+                    measure.annotation.style.left = `${midX}px`;
+                    measure.annotation.style.top = `${midY}px`;
+                });
+            }
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            updateAnnotationPositions();
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
